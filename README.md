@@ -46,3 +46,6 @@ Bearer access tokens required for rating/status/journal/follow endpoints.
 - Wire TMDb ingestion (nightly cron for now-playing/trending, on-demand search lookup) and hydrate `collections`.
 - Expand tests (alignment calculator, validations, endpoint integration).
 - Build SwiftUI client (Home, Detail/Rate, Feed, Profile/Alignment) hitting these routes; optional Next.js/Tailwind web client.
+
+Progress: 
+Verified end-to-end: from macOS terminal I logged in on the iOS Simulator, saw the sample titles, and successfully submitted a rating with vibes on a selected movie.
