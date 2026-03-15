@@ -49,6 +49,7 @@ const renderLanding = () => `<!doctype html>
 
   <section>
     <h2>Try it</h2>
+    <p id="status" style="color:#0f172a; font-weight:600;">Buttons ready.</p>
     <div class="grid">
       <button data-path="/api/health">Health</button>
       <button data-path="/api/vibes">Vibes</button>
@@ -68,16 +69,22 @@ const renderLanding = () => `<!doctype html>
 
   <script>
     const output = document.querySelector('#output');
-    const buttons = Array.from(document.querySelectorAll('button[data-path]'));
+    const status = document.querySelector('#status');
+    const buttons = document.querySelectorAll('button[data-path]');
+
+    function setStatus(msg, color = '#0f172a') {
+      if (status) status.textContent = msg, status.style.color = color;
+    }
+
+    if (!output) setStatus('Missing output textarea', '#b91c1c');
+    if (typeof fetch !== 'function') setStatus('Fetch API not available in this browser', '#b91c1c');
+
     if (output && buttons.length) {
-      buttons.forEach((btn) => {
+      for (const btn of buttons) {
         btn.addEventListener('click', async () => {
-          const path = btn.dataset.path;
+          const path = btn.getAttribute('data-path') || '';
           output.value = 'Loading ' + path + '…';
-          if (typeof fetch !== 'function') {
-            output.value = 'Fetch API not available in this browser.';
-            return;
-          }
+          setStatus('Requesting ' + path + ' …');
           try {
             const res = await fetch(path);
             const text = await res.text();
@@ -85,14 +92,16 @@ const renderLanding = () => `<!doctype html>
             try {
               formatted = JSON.stringify(JSON.parse(text), null, 2);
             } catch (_) {
-              // leave as plain text
+              // keep plain text
             }
             output.value = formatted;
+            setStatus('Loaded ' + path);
           } catch (err) {
             output.value = 'Request failed: ' + err;
+            setStatus('Request failed: ' + err, '#b91c1c');
           }
         });
-      });
+      }
     }
   </script>
 </body>
