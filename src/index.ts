@@ -32,6 +32,11 @@ const renderLanding = () => `<!doctype html>
     .grid { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
     textarea { width: 100%; min-height: 180px; border-radius: 12px; border: 1px solid #cbd5e1; padding: 12px; font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace; background: #f8fafc; }
     ul { padding-left: 20px; margin: 8px 0; }
+    .cards { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); margin-top: 12px; }
+    .card { border: 1px solid #e2e8f0; border-radius: 12px; padding: 10px; background: #fff; box-shadow: 0 8px 18px rgba(15, 23, 42, 0.05); display: flex; gap: 10px; }
+    .card img { width: 64px; height: 96px; object-fit: cover; border-radius: 8px; background: #e2e8f0; }
+    .card h3 { margin: 0 0 4px; font-size: 15px; }
+    .card p { margin: 0; font-size: 13px; color: #475569; }
   </style>
 </head>
 <body>
@@ -62,6 +67,7 @@ const renderLanding = () => `<!doctype html>
     </div>
     <p style="margin-top:12px;">Responses:</p>
     <textarea id="output" readonly>Click a button to fetch…</textarea>
+    <div id="cards" class="cards"></div>
   </section>
 
   <section>
