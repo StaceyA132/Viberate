@@ -112,9 +112,10 @@ app.use("/api", api);
 app.use(errorHandler);
 
 if (require.main === module) {
-  app.listen(env.port, () => {
+  const host = process.env.HOST ?? "127.0.0.1";
+  app.listen(env.port, host, () => {
     // eslint-disable-next-line no-console
-    console.log(`VibeRate API ready on http://localhost:${env.port}`);
+    console.log(`VibeRate API ready on http://${host}:${env.port}`);
   });
 }
 
