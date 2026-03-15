@@ -35,6 +35,7 @@ const renderLanding = () => `<!doctype html>
     .cards { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); margin-top: 12px; }
     .card { border: 1px solid #e2e8f0; border-radius: 12px; padding: 10px; background: #fff; box-shadow: 0 8px 18px rgba(15, 23, 42, 0.05); display: flex; gap: 10px; }
     .card img { width: 64px; height: 96px; object-fit: cover; border-radius: 8px; background: #e2e8f0; }
+    .card img.no-poster { object-fit: contain; }
     .card h3 { margin: 0 0 4px; font-size: 15px; }
     .card p { margin: 0; font-size: 13px; color: #475569; }
   </style>

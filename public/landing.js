@@ -3,6 +3,8 @@
   const status = document.querySelector("#status");
   const buttons = document.querySelectorAll("button[data-path]");
   const cards = document.querySelector("#cards");
+  const placeholder =
+    "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='300'><rect width='100%' height='100%' fill='%23e2e8f0'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-family='Helvetica,Arial,sans-serif' font-size='16' fill='%2394a3b8'>No Poster</text></svg>";
 
   const setStatus = (msg, color = "#0f172a") => {
     if (status) {
@@ -59,7 +61,11 @@
 
       const img = document.createElement("img");
       img.alt = item.name || "poster";
-      img.src = item.posterUrl || "";
+      img.src = item.posterUrl || placeholder;
+      img.onerror = () => {
+        img.src = placeholder;
+        img.classList.add("no-poster");
+      };
 
       const textWrap = document.createElement("div");
       const title = document.createElement("h3");
