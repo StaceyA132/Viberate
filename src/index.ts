@@ -1,3 +1,4 @@
+import path from "path";
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
@@ -7,6 +8,7 @@ import { errorHandler } from "./middleware/errorHandler";
 import api from "./routes/api";
 import auth from "./routes/auth";
 
+const staticRoot = path.join(__dirname, "..", "public");
 const renderLanding = () => `<!doctype html>
 <html lang="en">
 <head>
@@ -49,7 +51,7 @@ const renderLanding = () => `<!doctype html>
 
   <section>
     <h2>Try it</h2>
-    <p id="status" style="color:#0f172a; font-weight:600;">Buttons ready.</p>
+    <p id="status" style="color:#0f172a; font-weight:600;">Loading…</p>
     <div class="grid">
       <button data-path="/api/health">Health</button>
       <button data-path="/api/vibes">Vibes</button>
@@ -67,43 +69,7 @@ const renderLanding = () => `<!doctype html>
     <p>No API key is required. Protected routes use JWT Bearer tokens. Flow: <code>POST /api/auth/register</code> → <code>POST /api/auth/login</code> → include <code>Authorization: Bearer &lt;accessToken&gt;</code> on rating/status/feed endpoints.</p>
   </section>
 
-  <script>
-    const output = document.querySelector('#output');
-    const status = document.querySelector('#status');
-    const buttons = document.querySelectorAll('button[data-path]');
-
-    function setStatus(msg, color = '#0f172a') {
-      if (status) status.textContent = msg, status.style.color = color;
-    }
-
-    if (!output) setStatus('Missing output textarea', '#b91c1c');
-    if (typeof fetch !== 'function') setStatus('Fetch API not available in this browser', '#b91c1c');
-
-    if (output && buttons.length) {
-      for (const btn of buttons) {
-        btn.addEventListener('click', async () => {
-          const path = btn.getAttribute('data-path') || '';
-          output.value = 'Loading ' + path + '…';
-          setStatus('Requesting ' + path + ' …');
-          try {
-            const res = await fetch(path);
-            const text = await res.text();
-            let formatted = text;
-            try {
-              formatted = JSON.stringify(JSON.parse(text), null, 2);
-            } catch (_) {
-              // keep plain text
-            }
-            output.value = formatted;
-            setStatus('Loaded ' + path);
-          } catch (err) {
-            output.value = 'Request failed: ' + err;
-            setStatus('Request failed: ' + err, '#b91c1c');
-          }
-        });
-      }
-    }
-  </script>
+  <script src="/static/landing.js"></script>
 </body>
 </html>`;
 
@@ -117,6 +83,7 @@ app.use(
 );
 app.use(express.json());
 app.use(morgan("dev"));
+app.use("/static", express.static(staticRoot));
 
 app.get("/", (_req, res) => {
   res.type("html").send(renderLanding());
