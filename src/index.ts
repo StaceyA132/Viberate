@@ -68,21 +68,32 @@ const renderLanding = () => `<!doctype html>
 
   <script>
     const output = document.querySelector('#output');
-    document.querySelectorAll('button[data-path]').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        const path = btn.dataset.path;
-        output.value = 'Loading ' + path + '…';
-        try {
-          const res = await fetch(path);
-          const text = await res.text();
-          let formatted = text;
-          try { formatted = JSON.stringify(JSON.parse(text), null, 2); } catch (_) {}
-          output.value = formatted;
-        } catch (err) {
-          output.value = 'Request failed: ' + err;
-        }
+    const buttons = Array.from(document.querySelectorAll('button[data-path]'));
+    if (output && buttons.length) {
+      buttons.forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          const path = btn.dataset.path;
+          output.value = 'Loading ' + path + '…';
+          if (typeof fetch !== 'function') {
+            output.value = 'Fetch API not available in this browser.';
+            return;
+          }
+          try {
+            const res = await fetch(path);
+            const text = await res.text();
+            let formatted = text;
+            try {
+              formatted = JSON.stringify(JSON.parse(text), null, 2);
+            } catch (_) {
+              // leave as plain text
+            }
+            output.value = formatted;
+          } catch (err) {
+            output.value = 'Request failed: ' + err;
+          }
+        });
       });
-    });
+    }
   </script>
 </body>
 </html>`;
