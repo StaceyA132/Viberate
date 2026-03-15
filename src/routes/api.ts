@@ -1,5 +1,4 @@
 import { Router } from "express";
-import fetch from "node-fetch";
 import { z } from "zod";
 import { prisma } from "../config/prisma";
 import { env } from "../config/env";
@@ -7,6 +6,12 @@ import { HttpError } from "../middleware/errorHandler";
 import { validateBody } from "../middleware/validateRequest";
 import { requireAuth } from "../middleware/requireAuth";
 import { computeAlignment } from "../utils/alignment";
+
+type RequestInit = import("node-fetch").RequestInit;
+const fetchJson = async (url: string, init?: RequestInit) => {
+  const mod = await import("node-fetch");
+  return mod.default(url, init);
+};
 
 const router = Router();
 
@@ -120,7 +125,7 @@ async function fetchTmdbList(path: string) {
   if (!env.tmdbApiKey) return null;
   const url = `https://api.themoviedb.org/3/${path}?api_key=${env.tmdbApiKey}`;
   try {
-    const response = await fetch(url);
+    const response = await fetchJson(url);
     if (!response.ok) return null;
     const json = await response.json();
     const results = Array.isArray(json.results) ? json.results : [];

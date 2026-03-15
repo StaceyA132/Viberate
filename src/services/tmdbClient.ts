@@ -1,4 +1,3 @@
-import fetch from "node-fetch";
 import { env } from "../config/env";
 
 export type TmdbTitle = {
@@ -18,6 +17,7 @@ export type TmdbTitle = {
 export async function fetchTmdbTitle(tmdbId: number): Promise<TmdbTitle | null> {
   if (!env.tmdbApiKey) return null;
   const url = `https://api.themoviedb.org/3/movie/${tmdbId}?api_key=${env.tmdbApiKey}`;
+  const { default: fetch } = await import("node-fetch");
   const response = await fetch(url);
   if (!response.ok) return null;
   const data = await response.json();
