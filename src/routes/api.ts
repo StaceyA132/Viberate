@@ -1,6 +1,8 @@
 import { Router } from "express";
+import fetch from "node-fetch";
 import { z } from "zod";
 import { prisma } from "../config/prisma";
+import { env } from "../config/env";
 import { HttpError } from "../middleware/errorHandler";
 import { validateBody } from "../middleware/validateRequest";
 import { requireAuth } from "../middleware/requireAuth";
@@ -41,22 +43,22 @@ router.get("/vibes", async (_req, res) => {
 });
 
 router.get("/titles/now-playing", async (_req, res) => {
-  const titles = await prisma.title.findMany({ where: { collections: { has: "now-playing" } }, take: 20 });
+  const titles = (await fetchTmdbList("movie/now_playing")) ?? (await prisma.title.findMany({ where: { collections: { has: "now-playing" } }, take: 20 }));
   res.json({ data: titles });
 });
 
 router.get("/titles/popular", async (_req, res) => {
-  const titles = await prisma.title.findMany({ where: { collections: { has: "popular" } }, take: 20 });
+  const titles = (await fetchTmdbList("movie/popular")) ?? (await prisma.title.findMany({ where: { collections: { has: "popular" } }, take: 20 }));
   res.json({ data: titles });
 });
 
 router.get("/titles/top-rated", async (_req, res) => {
-  const titles = await prisma.title.findMany({ orderBy: { averageScore: "desc" }, take: 20 });
+  const titles = (await fetchTmdbList("movie/top_rated")) ?? (await prisma.title.findMany({ orderBy: { averageScore: "desc" }, take: 20 }));
   res.json({ data: titles });
 });
 
 router.get("/titles/trending", async (_req, res) => {
-  const titles = await prisma.title.findMany({ where: { collections: { has: "trending" } }, take: 20 });
+  const titles = (await fetchTmdbList("trending/movie/day")) ?? (await prisma.title.findMany({ where: { collections: { has: "trending" } }, take: 20 }));
   res.json({ data: titles });
 });
 
@@ -112,6 +114,35 @@ async function updateAverageScore(titleId: string) {
     where: { id: titleId },
     data: { averageScore: aggregate._avg.score ?? 0 },
   });
+}
+
+async function fetchTmdbList(path: string) {
+  if (!env.tmdbApiKey) return null;
+  const url = `https://api.themoviedb.org/3/${path}?api_key=${env.tmdbApiKey}`;
+  try {
+    const response = await fetch(url);
+    if (!response.ok) return null;
+    const json = await response.json();
+    const results = Array.isArray(json.results) ? json.results : [];
+    return results.slice(0, 20).map((item: any) => ({
+      id: `tmdb-${item.id}`,
+      tmdbId: item.id,
+      mediaType: "movie",
+      name: item.title || item.name,
+      overview: item.overview,
+      posterUrl: item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : undefined,
+      backdropUrl: item.backdrop_path ? `https://image.tmdb.org/t/p/w1280${item.backdrop_path}` : undefined,
+      releaseDate: item.release_date || item.first_air_date || undefined,
+      streamingOn: [],
+      genres: [],
+      collections: [],
+      averageScore: item.vote_average ?? 0,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    }));
+  } catch (_err) {
+    return null;
+  }
 }
 
 router.post("/titles/:id/rate", requireAuth, validateBody(ratingSchema), async (req, res, next) => {
